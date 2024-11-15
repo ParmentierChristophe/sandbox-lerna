@@ -1,1 +1,1 @@
-console.log("Hello from Microservice A with changes");
+console.log("Hello from Microservice A");

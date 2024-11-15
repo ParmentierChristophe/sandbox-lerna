@@ -17,7 +17,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      - name: Fetch all branches
+        run: |
+          git fetch --all
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -33,16 +37,16 @@ jobs:
       - name: Find modified packages
         id: lerna_changed
         run: |
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "Building all packages since this is a push to main"
-            npx lerna list --all --loglevel=silent --json > changed.json || echo "[]" > changed.json
-          else
+          git diff --name-only origin/main...HEAD > changed_files.txt
+          if [ -s changed_files.txt ]; then
             npx lerna list --since origin/main --loglevel=silent --json > changed.json || echo "[]" > changed.json
-          fi
-          if [ -s changed.json ] && [ $(jq length changed.json) -gt 0 ]; then
-            jq -r '.[].name' changed.json > modified-packages.txt
+            if [ -s changed.json ] && [ $(jq length changed.json) -gt 0 ]; then
+              jq -r '.[].name' changed.json > modified-packages.txt
+            else
+              echo "No modified packages" > modified-packages.txt
+            fi
           else
-            echo "No modified packages" > modified-packages.txt
+            echo "No modified files detected" > modified-packages.txt
           fi
 
       - name: Display modified packages
