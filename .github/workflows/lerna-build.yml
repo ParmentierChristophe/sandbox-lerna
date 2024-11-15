@@ -33,8 +33,8 @@ jobs:
       - name: Find modified packages
         id: lerna_changed
         run: |
-          npx lerna changed --loglevel=silent --json > changed.json
-          if [ -s changed.json ]; then
+          npx lerna changed --loglevel=silent --json > changed.json || echo "[]" > changed.json
+          if [ -s changed.json ] && [ $(jq length changed.json) -gt 0 ]; then
             jq -r '.[].name' changed.json > modified-packages.txt
           else
             echo "No modified packages" > modified-packages.txt
@@ -47,10 +47,10 @@ jobs:
       - name: Build modified packages
         if: success()
         run: |
-          if [ -s modified-packages.txt ]; then
+          if grep -q '[^[:space:]]' modified-packages.txt; then
             while IFS= read -r package; do
               echo "Building package: $package"
-              npx lerna run build --scope "$package" --stream
+              npx lerna run build --scope "$package" --stream --no-bail
             done < modified-packages.txt
           else
             echo "No modified packages to build."
@@ -59,10 +59,10 @@ jobs:
       - name: Validate modified packages
         if: success()
         run: |
-          if [ -s modified-packages.txt ]; then
+          if grep -q '[^[:space:]]' modified-packages.txt; then
             while IFS= read -r package; do
               echo "Validating package: $package"
-              npx lerna run validate --scope "$package" --stream
+              npx lerna run validate --scope "$package" --stream --no-bail
             done < modified-packages.txt
           else
             echo "No modified packages to validate."
