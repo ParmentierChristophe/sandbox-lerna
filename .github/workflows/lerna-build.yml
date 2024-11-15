@@ -50,7 +50,7 @@ jobs:
           if [ -s modified-packages.txt ]; then
             while IFS= read -r package; do
               echo "Building package: $package"
-              npx lerna run build --scope "$package"
+              npx lerna run build --scope "$package" --stream
             done < modified-packages.txt
           else
             echo "No modified packages to build."
@@ -62,7 +62,7 @@ jobs:
           if [ -s modified-packages.txt ]; then
             while IFS= read -r package; do
               echo "Validating package: $package"
-              npx lerna run validate --scope "$package"
+              npx lerna run validate --scope "$package" --stream
             done < modified-packages.txt
           else
             echo "No modified packages to validate."
