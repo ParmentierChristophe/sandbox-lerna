@@ -47,7 +47,7 @@ jobs:
       - name: Build modified packages
         if: success()
         run: |
-          if grep -q '[^[:space:]]' modified-packages.txt; then
+          if [ -s modified-packages.txt ] && grep -q '[^[:space:]]' modified-packages.txt && [ "$(cat modified-packages.txt)" != "No modified packages" ]; then
             while IFS= read -r package; do
               echo "Building package: $package"
               npx lerna run build --scope "$package" --stream --no-bail
@@ -59,7 +59,7 @@ jobs:
       - name: Validate modified packages
         if: success()
         run: |
-          if grep -q '[^[:space:]]' modified-packages.txt; then
+          if [ -s modified-packages.txt ] && grep -q '[^[:space:]]' modified-packages.txt && [ "$(cat modified-packages.txt)" != "No modified packages" ]; then
             while IFS= read -r package; do
               echo "Validating package: $package"
               npx lerna run validate --scope "$package" --stream --no-bail
