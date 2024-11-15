@@ -1,0 +1,9 @@
+{
+  "name": "microservice-a",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building microservice-a'",
+    "validate": "echo 'Validating microservice-a'"
+  }
+}
