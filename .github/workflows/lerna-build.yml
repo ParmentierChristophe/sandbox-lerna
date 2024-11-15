@@ -33,7 +33,12 @@ jobs:
       - name: Find modified packages
         id: lerna_changed
         run: |
-          npx lerna list --since origin/main --loglevel=silent --json > changed.json || echo "[]" > changed.json
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "Building all packages since this is a push to main"
+            npx lerna list --all --loglevel=silent --json > changed.json || echo "[]" > changed.json
+          else
+            npx lerna list --since origin/main --loglevel=silent --json > changed.json || echo "[]" > changed.json
+          fi
           if [ -s changed.json ] && [ $(jq length changed.json) -gt 0 ]; then
             jq -r '.[].name' changed.json > modified-packages.txt
           else
