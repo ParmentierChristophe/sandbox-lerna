@@ -38,19 +38,20 @@ jobs:
             jq -r '.[].name' changed.json > modified-packages.txt
           else
             echo "No modified packages" > modified-packages.txt
+          fi
 
       - name: Display modified packages
         run: |
-          cat modified-packages.txt
+          cat modified-packages.txt || echo "modified-packages.txt file not found"
 
       - name: Build modified packages
         if: success()
         run: |
           if [ -s modified-packages.txt ]; then
-            for package in $(cat modified-packages.txt); do
+            while IFS= read -r package; do
               echo "Building package: $package"
-              npx lerna run build --scope $package
-            done
+              npx lerna run build --scope "$package"
+            done < modified-packages.txt
           else
             echo "No modified packages to build."
           fi
@@ -59,10 +60,10 @@ jobs:
         if: success()
         run: |
           if [ -s modified-packages.txt ]; then
-            for package in $(cat modified-packages.txt); do
+            while IFS= read -r package; do
               echo "Validating package: $package"
-              npx lerna run validate --scope $package
-            done
+              npx lerna run validate --scope "$package"
+            done < modified-packages.txt
           else
             echo "No modified packages to validate."
           fi
